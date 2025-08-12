@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkinCare - Ton Coach Beauté Personnel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffeef8 0%, #e6f2ff 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #ff6b6b;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+            font-weight: 400;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #8e9aaf;
+            margin-bottom: 30px;
+            font-size: 1em;
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #f0f0f0;
+            z-index: 1;
+        }
+
+        .progress-step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-step.active {
+            background: linear-gradient(135deg, #ff6b6b, #ffb6b9);
+        }
+
+        .section {
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #5c677d;
+            font-weight: 400;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #f5f5f5;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background: #fafafa;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #ffb6b9;
+            background: white;
+        }
+
+        button {
+            background: linear-gradient(135deg, #ff6b6b, #ffb6b9);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .skin-type-grid, .concerns-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .skin-type-option, .concern-option {
+            padding: 20px 15px;
+            border: 2px solid #f5f5f5;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            background: linear-gradient(135deg, #ffffff, #fafafa);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skin-type-option::before, .concern-option::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #ff6b6b, #ffb6b9);
+            border-radius: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+        }
+
+        .skin-type-option:hover, .concern-option:hover {
+            border-color: #ffb6b9;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 182, 185, 0.3);
+        }
+
+        .skin-type-option:hover::before, .concern-option:hover::before {
+            opacity: 0.1;
+        }
+
+        .skin-type-option.selected, .concern-option.selected {
+            background: linear-gradient(135deg, #fff0f5, #ffe6ec);
+            color: #ff6b6b;
+            border-color: #ffb6b9;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);
+        }
+
+        .skin-type-option strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            color: #5c677d;
+        }
+
+        .skin-type-option.selected strong, .concern-option.selected strong {
+            color: #ff6b6b;
+        }
+
+        .skin-type-option span {
+            display: block;
+            font-size: 1.5em;
+            margin-bottom: 8px;
+        }
+
+        .concern-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .concern-option span {
+            font-size: 1.8em;
+        }
+
+        .result {
+            background: linear-gradient(135deg, #fff5f7, #fef8fa);
+            padding: 30px;
+            border-radius: 20px;
+            margin-top: 20px;
+        }
+
+        .routine-item {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
+            animation: slideInRight 0.3s ease;
+            color: #5c677d;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        /* Styles pour les photos */
+        .photo-upload-zone {
+            border: 3px dashed #ffe0e6;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #fff9fa, #fff5f7);
+        }
+
+        .photo-upload-zone:hover {
+            border-color: #ffb6b9;
+            background: linear-gradient(135deg, #fff5f7, #ffeef1);
+        }
+
+        .upload-content i {
+            font-size: 3em;
+            color: #ff6b6b;
+            margin-bottom: 15px;
+        }
+
+        .photo-types {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+
+        .photo-type-btn {
+            padding: 10px 20px;
+            border: 2px solid #f5f5f5;
+            border-radius: 25px;
+            background: white;
+            color: #8e9aaf;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .photo-type-btn.active {
+            background: linear-gradient(135deg, #ff6b6b, #ffb6b9);
+            color: white;
+            border-color: #ff6b6b;
+        }
+
+        .photo-gallery {
+            margin: 30px 0;
+            min-height: 200px;
+        }
+
+        .gallery-empty {
+            text-align: center;
+            padding: 40px;
+            color: #c8d3e0;
+        }
+
+        .gallery-empty i {
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* Styles pour l'assistant */
+        .ai-welcome {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #fff5f7, #ffeef1);
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+
+        .ai-avatar {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        .ai-sections {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .ai-section {
+            background: white;
+            border: 2px solid #f5f5f5;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .ai-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(255, 182, 185, 0.15);
+            border-color: #ffb6b9;
+        }
+
+        .ai-section-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .ai-section h4 {
+            color: #5c677d;
+            margin: 10px 0 5px 0;
+        }
+
+        .ai-section p {
+            color: #8e9aaf;
+            font-size: 0.9em;
+        }
+
+        .ai-output {
+            background: linear-gradient(135deg, #fafbfc, #f5f7f9);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            min-height: 200px;
+            border: 2px dashed #e8ecf1;
+            transition: all 0.3s ease;
+        }
+
+        .ai-output.active {
+            border-color: #ffb6b9;
+            background: linear-gradient(135deg, #fff9fa, #fff5f7);
+            border-style: solid;
+        }
+
+        .ai-placeholder {
+            text-align: center;
+            color: #c8d3e0;
+            padding: 40px 20px;
+        }
+
+        .ai-placeholder i {
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .ai-recommendation {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #ff6b6b;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .ai-loading {
+            text-align: center;
+            padding: 40px;
+            color: #ff6b6b;
+        }
+
+        .ai-loading i {
+            font-size: 2em;
+            margin-bottom: 15px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            margin: 10px 5px;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #ff6b6b, #ffb6b9);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .section-title {
+            color: #5c677d;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 400;
+        }
+
+        h2 {
+            color: #5c677d;
+            font-weight: 400;
+        }
+
+        h3 {
+            color: #5c677d;
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌸 SkinCare</h1>
+        <p class="subtitle">Ton coach beauté bienveillant et personnalisé</p>
+
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-step active">1</div>
+            <div class="progress-step">2</div>
+            <div class="progress-step">3</div>
+            <div class="progress-step">4</div>
+        </div>
+
+        <!-- Étape 1: Inscription -->
+        <div class="section active" id="step1">
+            <h2>👋 Bienvenue ! Commençons par faire connaissance</h2>
+            <div class="form-group">
+                <label for="name">Prénom :</label>
+                <input type="text" id="name" placeholder="Sarah" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email :</label>
+                <input type="email" id="email" placeholder="sarah@example.com" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Mot de passe :</label>
+                <input type="password" id="password" placeholder="Minimum 6 caractères" required>
+            </div>
+            <div class="form-group">
+                <label for="age">Âge :</label>
+                <input type="number" id="age" placeholder="25" min="13" max="100" required>
+            </div>
+            <button onclick="nextStep(1)">Suivant →</button>
+        </div>
+
+        <!-- Étape 2: Type de peau -->
+        <div class="section" id="step2">
+            <h2>🔍 Quel est ton type de peau ?</h2>
+            <div class="skin-type-grid">
+                <div class="skin-type-option" onclick="selectSkinType('normale')">
+                    <span>✨</span>
+                    <strong>Normale</strong>
+                    Équilibrée, douce et confortable
+                </div>
+                <div class="skin-type-option" onclick="selectSkinType('sèche')">
+                    <span>🏜️</span>
+                    <strong>Sèche</strong>
+                    Tiraillements, zones rugueuses
+                </div>
+                <div class="skin-type-option" onclick="selectSkinType('grasse')">
+                    <span>💧</span>
+                    <strong>Grasse</strong>
+                    Brillance, texture irrégulière
+                </div>
+                <div class="skin-type-option" onclick="selectSkinType('mixte')">
+                    <span>🎭</span>
+                    <strong>Mixte</strong>
+                    Zone T grasse, joues sèches
+                </div>
+                <div class="skin-type-option" onclick="selectSkinType('sensible')">
+                    <span>🌸</span>
+                    <strong>Sensible</strong>
+                    Réactive, rougeurs fréquentes
+                </div>
+            </div>
+            <button onclick="nextStep(2)" id="skinTypeNext" style="margin-top: 20px;" disabled>Suivant →</button>
+        </div>
+
+        <!-- Étape 3: Préoccupations -->
+        <div class="section" id="step3">
+            <h2>🎯 Quelles sont tes préoccupations ? (plusieurs choix possibles)</h2>
+            <div class="concerns-grid">
+                <div class="concern-option" onclick="toggleConcern('acné')">
+                    <span>🔴</span>
+                    <strong>Acné</strong>
+                    Boutons & imperfections
+                </div>
+                <div class="concern-option" onclick="toggleConcern('points noirs')">
+                    <span>⚫</span>
+                    <strong>Points noirs</strong>
+                    Comédons visibles
+                </div>
+                <div class="concern-option" onclick="toggleConcern('pores dilatés')">
+                    <span>🔍</span>
+                    <strong>Pores dilatés</strong>
+                    Texture irrégulière
+                </div>
+                <div class="concern-option" onclick="toggleConcern('taches pigmentaires')">
+                    <span>🎨</span>
+                    <strong>Taches</strong>
+                    Hyperpigmentation
+                </div>
+                <div class="concern-option" onclick="toggleConcern('rides')">
+                    <span>⏰</span>
+                    <strong>Rides</strong>
+                    Signes de l'âge
+                </div>
+                <div class="concern-option" onclick="toggleConcern('sécheresse')">
+                    <span>🌵</span>
+                    <strong>Sécheresse</strong>
+                    Déshydratation
+                </div>
+                <div class="concern-option" onclick="toggleConcern('sensibilité')">
+                    <span>🌡️</span>
+                    <strong>Sensibilité</strong>
+                    Irritations & rougeurs
+                </div>
+                <div class="concern-option" onclick="toggleConcern('brillance')">
+                    <span>✨</span>
+                    <strong>Brillance</strong>
+                    Excès de sébum
+                </div>
+                <div class="concern-option" onclick="toggleConcern('cernes')">
+                    <span>👁️</span>
+                    <strong>Cernes</strong>
+                    Poches & fatigue
+                </div>
+                <div class="concern-option" onclick="toggleConcern('teint terne')">
+                    <span>☁️</span>
+                    <strong>Teint terne</strong>
+                    Manque d'éclat
+                </div>
+                <div class="concern-option" onclick="toggleConcern('cicatrices')">
+                    <span>🩹</span>
+                    <strong>Cicatrices</strong>
+                    Marques résiduelles
+                </div>
+                <div class="concern-option" onclick="toggleConcern('relâchement')">
+                    <span>📉</span>
+                    <strong>Relâchement</strong>
+                    Perte de fermeté
+                </div>
+            </div>
+            <button onclick="nextStep(3)" style="margin-top: 20px;">Suivant →</button>
+        </div>
+
+        <!-- Étape 4: Stress -->
+        <div class="section" id="step4">
+            <h2>😌 Quel est ton niveau de stress actuellement ?</h2>
+            <div class="form-group">
+                <label for="stressLevel">Niveau de stress (1 = très détendue, 10 = très stressée) :</label>
+                <input type="range" id="stressLevel" min="1" max="10" value="5" oninput="updateStressDisplay()">
+                <div style="text-align: center; margin-top: 10px;">
+                    <span id="stressDisplay">5 / 10</span>
+                </div>
+            </div>
+            <button onclick="createProfile()" style="margin-top: 20px;">Créer ma routine ! ✨</button>
+        </div>
+
+        <!-- Résultat -->
+        <div class="section" id="result">
+            <div class="result">
+                <h2>🎉 Ta routine personnalisée est prête !</h2>
+                <div id="routineContent"></div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button onclick="showPhotos()" style="flex: 1;">
+                        <i class="fas fa-camera"></i> Mes Photos
+                    </button>
+                    <button onclick="showCheckIn()" style="flex: 1;">
+                        <i class="fas fa-check-circle"></i> Check-in
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Photos -->
+        <div class="section" id="photos">
+            <div class="form-card">
+                <h2 class="section-title">
+                    <i class="fas fa-camera"></i>
+                    Mes Photos de Progression
+                </h2>
+                <div class="photo-upload-zone" onclick="document.getElementById('photoInput').click()">
+                    <div class="upload-content">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>Ajouter une photo</h3>
+                        <p>Clique ici ou glisse une image</p>
+                        <input type="file" id="photoInput" accept="image/*" style="display: none;" onchange="uploadPhoto(event)">
+                    </div>
+                </div>
+                <div class="photo-types">
+                    <button class="photo-type-btn active" onclick="selectPhotoType('progress')" data-type="progress">
+                        <i class="fas fa-chart-line"></i> Progression
+                    </button>
+                    <button class="photo-type-btn" onclick="selectPhotoType('before')" data-type="before">
+                        <i class="fas fa-arrow-left"></i> Avant
+                    </button>
+                    <button class="photo-type-btn" onclick="selectPhotoType('after')" data-type="after">
+                        <i class="fas fa-arrow-right"></i> Après
+                    </button>
+                </div>
+                <div class="photo-gallery" id="photoGallery">
+                    <div class="gallery-empty">
+                        <i class="fas fa-images"></i>
+                        <p>Aucune photo pour le moment</p>
+                        <small>Ajoute ta première photo pour commencer ton suivi !</small>
+                    </div>
+                </div>
+                <button class="btn" onclick="showAnalytics()">
+                    <span>Voir mes analytics</span>
+                    <i class="fas fa-chart-bar"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Analytics -->
+        <div class="section" id="analytics">
+            <div class="form-card">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-bar"></i>
+                    Tes Analytics Détaillées
+                </h2>
+                <div class="analytics-grid" id="analyticsContent">
+                    <div class="loading-analytics">
+                        <p>Chargement de tes données...</p>
+                    </div>
+                </div>
+                <button class="btn" onclick="showCheckIn()">
+                    <span>Nouveau check-in</span>
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="btn" onclick="showAIAssistant()">
+                    <span>Assistant Beauté</span>
+                    <i class="fas fa-sparkles"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Assistant IA -->
+        <div class="section" id="ai-assistant">
+            <div class="form-card">
+                <h2 class="section-title">
+                    <i class="fas fa-robot"></i>
+                    Ton Assistant Personnel
+                </h2>
+                <div class="ai-welcome">
+                    <div class="ai-avatar">✨</div>
+                    <h3>Salut ! Je suis ton coach beauté !</h3>
+                    <p>J'analyse tes données pour te donner des conseils personnalisés et bienveillants.</p>
+                </div>
+                <div class="ai-sections">
+                    <div class="ai-section" onclick="generateRecommendations()">
+                        <div class="ai-section-icon">🎯</div>
+                        <h4>Recommandations Smart</h4>
+                        <p>Produits parfaits pour TON type de peau</p>
+                    </div>
+                    <div class="ai-section" onclick="generatePredictions()">
+                        <div class="ai-section-icon">🔮</div>
+                        <h4>Prédictions Futures</h4>
+                        <p>Comment va évoluer ta peau</p>
+                    </div>
+                    <div class="ai-section" onclick="generateInsights()">
+                        <div class="ai-section-icon">💡</div>
+                        <h4>Insights Personnalisés</h4>
+                        <p>Patterns cachés dans tes données</p>
+                    </div>
+                    <div class="ai-section" onclick="generateTips()">
+                        <div class="ai-section-icon">✨</div>
+                        <h4>Conseils Adaptatifs</h4>
+                        <p>Tips basés sur tes habitudes</p>
+                    </div>
+                </div>
+                <div class="ai-output" id="aiOutput">
+                    <div class="ai-placeholder">
+                        <i class="fas fa-magic"></i>
+                        <p>Sélectionne une option ci-dessus pour découvrir mes analyses !</p>
+                    </div>
+                </div>
+                <button class="btn" onclick="showPhotos()">
+                    <span>Retour aux photos</span>
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Check-in -->
+        <div class="section" id="checkin">
+            <h2>📝 Check-in quotidien</h2>
+            <div class="form-group">
+                <label for="skinCondition">État de ta peau aujourd'hui (1-10) :</label>
+                <input type="range" id="skinCondition" min="1" max="10" value="5" oninput="updateSkinDisplay()">
+                <div style="text-align: center; margin-top: 10px;">
+                    <span id="skinDisplay">5 / 10</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="sleepHours">Heures de sommeil :</label>
+                <input type="number" id="sleepHours" min="1" max="12" value="7" placeholder="7">
+            </div>
+            <button onclick="submitCheckIn()">Enregistrer mon check-in ✅</button>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        let currentStep = 1;
+        let skinType = '';
+        let concerns = [];
+        let checkinsHistory = [];
+        let photoType = 'progress';
+
+        function nextStep(step) {
+            if (step === 1) {
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const age = document.getElementById('age').value;
+
+                if (!name || !email || !password || !age) {
+                    showNotification('⚠️ Remplis tous les champs !');
+                    return;
+                }
+            }
+
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            currentStep++;
+            document.getElementById(`step${currentStep}`).classList.add('active');
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const steps = document.querySelectorAll('.progress-step');
+            steps.forEach((step, index) => {
+                if (index < currentStep) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                }
+            });
+        }
+
+        function selectSkinType(type) {
+            skinType = type;
+            document.querySelectorAll('.skin-type-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.target.closest('.skin-type-option').classList.add('selected');
+            document.getElementById('skinTypeNext').disabled = false;
+        }
+
+        function toggleConcern(concern) {
+            const index = concerns.indexOf(concern);
+            if (index > -1) {
+                concerns.splice(index, 1);
+                event.target.classList.remove('selected');
+            } else {
+                concerns.push(concern);
+                event.target.classList.add('selected');
+            }
+        }
+
+        function updateStressDisplay() {
+            const value = document.getElementById('stressLevel').value;
+            document.getElementById('stressDisplay').textContent = `${value} / 10`;
+        }
+
+        function updateSkinDisplay() {
+            const value = document.getElementById('skinCondition').value;
+            document.getElementById('skinDisplay').textContent = `${value} / 10`;
+        }
+
+        function createProfile() {
+            const name = document.getElementById('name').value;
+            const stressLevel = document.getElementById('stressLevel').value;
+            const age = document.getElementById('age').value;
+
+            // Déterminer le moment de la journée
+            const hour = new Date().getHours();
+            const timeGreeting = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
+
+            let routine = `
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h2 style="color: #ff6b6b; font-size: 1.8em; margin-bottom: 10px;">
+                        ${timeGreeting} ${name} ! 🌺
+                    </h2>
+                    <p style="color: #8e9aaf; font-size: 1.1em;">
+                        Ta routine sur-mesure est prête à transformer ta peau
+                    </p>
+                </div>
+
+                <div class="routine-summary" style="background: linear-gradient(135deg, #fff0f5, #ffeef3); padding: 20px; border-radius: 15px; margin-bottom: 25px; text-align: center;">
+                    <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 15px;">
+                        <div>
+                            <span style="font-size: 2em;">🎯</span>
+                            <p style="color: #5c677d; margin: 5px 0;"><strong>Type de peau</strong></p>
+                            <p style="color: #ff6b6b; font-size: 1.1em;">${skinType.charAt(0).toUpperCase() + skinType.slice(1)}</p>
+                        </div>
+                        <div>
+                            <span style="font-size: 2em;">📊</span>
+                            <p style="color: #5c677d; margin: 5px 0;"><strong>Priorités</strong></p>
+                            <p style="color: #ff6b6b; font-size: 1.1em;">${concerns.length || 0} zones</p>
+                        </div>
+                        <div>
+                            <span style="font-size: 2em;">⏱️</span>
+                            <p style="color: #5c677d; margin: 5px 0;"><strong>Temps estimé</strong></p>
+                            <p style="color: #ff6b6b; font-size: 1.1em;">5-7 min</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const routines = {
+                'normale': {
+                    matin: [
+                        { step: 'Nettoyage doux', desc: 'Gel nettoyant pH neutre', time: '30 sec', icon: '🧼' },
+                        { step: 'Tonique équilibrant', desc: 'Eau florale de rose', time: '15 sec', icon: '💧' },
+                        { step: 'Sérum vitamine C', desc: '10-15% pour l\'éclat', time: '30 sec', icon: '✨' },
+                        { step: 'Hydratation légère', desc: 'Crème gel matifiante', time: '30 sec', icon: '💦' },
+                        { step: 'Protection solaire', desc: 'SPF 30+ obligatoire !', time: '30 sec', icon: '☀️' }
+                    ],
+                    soir: [
+                        { step: 'Double nettoyage', desc: 'Huile + gel nettoyant', time: '1 min', icon: '🌙' },
+                        { step: 'Tonique apaisant', desc: 'Sans alcool', time: '15 sec', icon: '💧' },
+                        { step: 'Sérum réparateur', desc: 'Niacinamide 5%', time: '30 sec', icon: '🔬' },
+                        { step: 'Crème de nuit', desc: 'Régénération cellulaire', time: '30 sec', icon: '🌜' },
+                        { step: 'Soin contour yeux', desc: 'Anti-cernes et poches', time: '15 sec', icon: '👁️' }
+                    ]
+                },
+                'sèche': {
+                    matin: [
+                        { step: 'Nettoyage crémeux', desc: 'Lait nettoyant ultra-doux', time: '30 sec', icon: '🥛' },
+                        { step: 'Brume hydratante', desc: 'Acide hyaluronique', time: '15 sec', icon: '💧' },
+                        { step: 'Sérum nourrissant', desc: 'Céramides + peptides', time: '30 sec', icon: '💎' },
+                        { step: 'Crème riche', desc: 'Beurre de karité + squalane', time: '45 sec', icon: '🧈' },
+                        { step: 'SPF hydratant', desc: 'Protection + nutrition', time: '30 sec', icon: '☀️' }
+                    ],
+                    soir: [
+                        { step: 'Huile démaquillante', desc: 'Jojoba ou argan', time: '1 min', icon: '🌿' },
+                        { step: 'Nettoyant crème', desc: 'Sans sulfates', time: '30 sec', icon: '🧴' },
+                        { step: 'Essence hydratante', desc: '7 couches d\'hydratation', time: '45 sec', icon: '💦' },
+                        { step: 'Sérum réparateur', desc: 'Rétinol 0.3% (2x/sem)', time: '30 sec', icon: '⚡' },
+                        { step: 'Masque de nuit', desc: 'Sleeping mask nourrissant', time: '1 min', icon: '😴' }
+                    ]
+                },
+                'grasse': {
+                    matin: [
+                        { step: 'Gel moussant', desc: 'Acide salicylique 0.5%', time: '45 sec', icon: '🫧' },
+                        { step: 'Toner purifiant', desc: 'BHA + thé vert', time: '20 sec', icon: '🍵' },
+                        { step: 'Sérum matifiant', desc: 'Niacinamide 10% + zinc', time: '30 sec', icon: '⚗️' },
+                        { step: 'Gel hydratant', desc: 'Oil-free, non comédogène', time: '30 sec', icon: '💧' },
+                        { step: 'SPF fluide', desc: 'Fini mat, anti-brillance', time: '30 sec', icon: '☀️' }
+                    ],
+                    soir: [
+                        { step: 'Eau micellaire', desc: 'Démaquillage efficace', time: '45 sec', icon: '💧' },
+                        { step: 'Mousse purifiante', desc: 'Nettoie en profondeur', time: '45 sec', icon: '🧽' },
+                        { step: 'Lotion exfoliante', desc: 'AHA 5% (3x/sem)', time: '20 sec', icon: '✨' },
+                        { step: 'Sérum anti-imperfections', desc: 'Rétinol + BHA', time: '30 sec', icon: '💉' },
+                        { step: 'Crème légère nuit', desc: 'Régule le sébum', time: '30 sec', icon: '🌛' }
+                    ]
+                },
+                'mixte': {
+                    matin: [
+                        { step: 'Gel nettoyant doux', desc: 'Équilibre zone T', time: '30 sec', icon: '🧼' },
+                        { step: 'Tonique bi-phase', desc: 'Purifie et hydrate', time: '20 sec', icon: '💧' },
+                        { step: 'Sérum multi-zones', desc: 'Adapté à chaque zone', time: '45 sec', icon: '🎯' },
+                        { step: 'Crème équilibrante', desc: 'Texture modulable', time: '45 sec', icon: '⚖️' },
+                        { step: 'Protection solaire', desc: 'SPF 35+ hybride', time: '30 sec', icon: '☀️' }
+                    ],
+                    soir: [
+                        { step: 'Démaquillant bi-phase', desc: 'Yeux + visage', time: '1 min', icon: '🌙' },
+                        { step: 'Nettoyant équilibrant', desc: 'Régule sans assécher', time: '30 sec', icon: '🧴' },
+                        { step: 'Essence hydratante', desc: 'Première couche d\'hydratation', time: '20 sec', icon: '💦' },
+                        { step: 'Sérum personnalisé', desc: 'Cocktail d\'actifs ciblés', time: '45 sec', icon: '🔬' },
+                        { step: 'Crème nuit adaptative', desc: 'S\'ajuste à tes besoins', time: '30 sec', icon: '🌜' }
+                    ]
+                },
+                'sensible': {
+                    matin: [
+                        { step: 'Eau micellaire douce', desc: 'Sans rinçage si irritée', time: '30 sec', icon: '💧' },
+                        { step: 'Brume apaisante', desc: 'Eau thermale pure', time: '15 sec', icon: '🌊' },
+                        { step: 'Sérum barrière', desc: 'Centella + céramides', time: '30 sec', icon: '🛡️' },
+                        { step: 'Crème protectrice', desc: 'Anti-rougeurs, hypoallergénique', time: '45 sec', icon: '🤍' },
+                        { step: 'SPF 50 minéral', desc: 'Zinc oxide only', time: '30 sec', icon: '☀️' }
+                    ],
+                    soir: [
+                        { step: 'Lait démaquillant', desc: 'Ultra-doux, sans parfum', time: '1 min', icon: '🥛' },
+                        { step: 'Rinçage eau tiède', desc: 'Jamais d\'eau chaude !', time: '20 sec', icon: '💧' },
+                        { step: 'Sérum calmant', desc: 'Aloe vera + camomille', time: '30 sec', icon: '🌿' },
+                        { step: 'Crème cocooning', desc: 'Texture baume réconfortante', time: '45 sec', icon: '🧈' },
+                        { step: 'Huile apaisante', desc: 'Calendula (si très sèche)', time: '20 sec', icon: '✨' }
+                    ]
+                }
+            };
+
+            const selectedRoutine = routines[skinType] || routines['normale'];
+
+            // Routine du matin détaillée
+            routine += `
+                <div class="routine-item" style="background: linear-gradient(135deg, #fff9e6, #fff5d6); border-left: 4px solid #ffc107;">
+                    <h3 style="color: #ff8c42; font-size: 1.3em; margin-bottom: 20px;">
+                        ☀️ Ta routine du matin <span style="font-size: 0.8em; color: #8e9aaf;">(5-7 minutes)</span>
+                    </h3>
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+            `;
+
+            selectedRoutine.matin.forEach((step, index) => {
+                routine += `
+                    <div style="display: flex; align-items: start; gap: 15px; padding: 12px; background: white; border-radius: 12px;">
+                        <div style="min-width: 40px; height: 40px; background: linear-gradient(135deg, #ffeb3b, #ffc107); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                            ${index + 1}
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <strong style="color: #5c677d; font-size: 1.05em;">${step.icon} ${step.step}</strong>
+                                <span style="color: #ffb088; font-size: 0.85em;">⏱ ${step.time}</span>
+                            </div>
+                            <p style="color: #8e9aaf; margin-top: 5px; font-size: 0.9em;">${step.desc}</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            routine += `</div></div>`;
+
+            // Routine du soir détaillée
+            routine += `
+                <div class="routine-item" style="background: linear-gradient(135deg, #f0e6ff, #e6d6ff); border-left: 4px solid #9c27b0;">
+                    <h3 style="color: #8e44ad; font-size: 1.3em; margin-bottom: 20px;">
+                        🌙 Ta routine du soir <span style="font-size: 0.8em; color: #8e9aaf;">(7-10 minutes)</span>
+                    </h3>
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+            `;
+
+            selectedRoutine.soir.forEach((step, index) => {
+                routine += `
+                    <div style="display: flex; align-items: start; gap: 15px; padding: 12px; background: white; border-radius: 12px;">
+                        <div style="min-width: 40px; height: 40px; background: linear-gradient(135deg, #9c27b0, #7b1fa2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                            ${index + 1}
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <strong style="color: #5c677d; font-size: 1.05em;">${step.icon} ${step.step}</strong>
+                                <span style="color: #b19cd9; font-size: 0.85em;">⏱ ${step.time}</span>
+                            </div>
+                            <p style="color: #8e9aaf; margin-top: 5px; font-size: 0.9em;">${step.desc}</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            routine += `</div></div>`;
+
+            // Traitements spécifiques selon les préoccupations
+            if (concerns.length > 0) {
+                routine += `
+                    <div class="routine-item" style="background: linear-gradient(135deg, #e6f7ff, #d6efff); border-left: 4px solid #2196f3;">
+                        <h3 style="color: #1976d2; font-size: 1.3em; margin-bottom: 20px;">
+                            🎯 Traitements ciblés pour tes préoccupations
+                        </h3>
+                        <div style="display: grid; gap: 12px;">
+                `;
+                
+                if (concerns.includes('acné')) {
+                    routine += `
+                        <div style="padding: 15px; background: white; border-radius: 12px;">
+                            <strong style="color: #ff6b6b;">🔴 Acné</strong>
+                            <p style="color: #5c677d; margin-top: 8px;">• Patch anti-imperfections la nuit sur les boutons</p>
+                            <p style="color: #5c677d;">• Masque à l'argile verte 1x/semaine (10 min)</p>
+                            <p style="color: #5c677d;">• Évite de toucher ton visage dans la journée</p>
+                        </div>
+                    `;
+                }
+                if (concerns.includes('rides')) {
+                    routine += `
+                        <div style="padding: 15px; background: white; border-radius: 12px;">
+                            <strong style="color: #ff6b6b;">⏰ Anti-âge</strong>
+                            <p style="color: #5c677d; margin-top: 8px;">• Massage facial 2 min chaque soir (mouvements vers le haut)</p>
+                            <p style="color: #5c677d;">• Rétinol progressif : commencer 1x/sem puis augmenter</p>
+                            <p style="color: #5c677d;">• Sérum contour des yeux matin ET soir</p>
+                        </div>
+                    `;
+                }
+                if (concerns.includes('taches pigmentaires')) {
+                    routine += `
+                        <div style="padding: 15px; background: white; border-radius: 12px;">
+                            <strong style="color: #ff6b6b;">🎨 Taches</strong>
+                            <p style="color: #5c677d; margin-top: 8px;">• Sérum vitamine C chaque matin (avant le SPF)</p>
+                            <p style="color: #5c677d;">• Exfoliation AHA 2x/semaine le soir</p>
+                            <p style="color: #5c677d;">• SPF 50 obligatoire, même par temps nuageux !</p>
+                        </div>
+                    `;
+                }
+                if (concerns.includes('cernes')) {
+                    routine += `
+                        <div style="padding: 15px; background: white; border-radius: 12px;">
+                            <strong style="color: #ff6b6b;">👁️ Cernes & Poches</strong>
+                            <p style="color: #5c677d; margin-top: 8px;">• Massage drainant avec roll-on froid</p>
+                            <p style="color: #5c677d;">• Crème caféine matin et soir</p>
+                            <p style="color: #5c677d;">• Dormir tête légèrement surélevée</p>
+                        </div>
+                    `;
+                }
+                if (concerns.includes('teint terne')) {
+                    routine += `
+                        <div style="padding: 15px; background: white; border-radius: 12px;">
+                            <strong style="color: #ff6b6b;">☁️ Teint terne</strong>
+                            <p style="color: #5c677d; margin-top: 8px;">• Gommage enzymatique 2x/semaine</p>
+                            <p style="color: #5c677d;">• Sérum éclat vitamine C + niacinamide</p>
+                            <p style="color: #5c677d;">• Masque illuminateur hebdomadaire</p>
+                        </div>
+                    `;
+                }
+                if (concerns.includes('cicatrices')) {
+                    routine += `
+                        <div style="padding: 15px; background: white; border-radius: 12px;">
+                            <strong style="color: #ff6b6b;">🩹 Cicatrices</strong>
+                            <p style="color: #5c677d; margin-top: 8px;">• Sérum réparateur centella asiatica</p>
+                            <p style="color: #5c677d;">• Micro-needling 1x/mois (avec dermatologue)</p>
+                            <p style="color: #5c677d;">• Protection solaire SPF 50 indispensable</p>
+                        </div>
+                    `;
+                }
+                if (concerns.includes('relâchement')) {
+                    routine += `
+                        <div style="padding: 15px; background: white; border-radius: 12px;">
+                            <strong style="color: #ff6b6b;">📉 Relâchement cutané</strong>
+                            <p style="color: #5c677d; margin-top: 8px;">• Massage facial lifting 5 min/jour</p>
+                            <p style="color: #5c677d;">• Sérum peptides + collagène</p>
+                            <p style="color: #5c677d;">• Exercices de yoga facial</p>
+                        </div>
+                    `;
+                }
+                if (concerns.includes('sécheresse')) {
+                    routine += `
+                        <div style="padding: 15px; background: white; border-radius: 12px;">
+                            <strong style="color: #ff6b6b;">🌵 Sécheresse extrême</strong>
+                            <p style="color: #5c677d; margin-top: 8px;">• Layering : 7 couches d'hydratation</p>
+                            <p style="color: #5c677d;">• Huile visage scellante le soir</p>
+                            <p style="color: #5c677d;">• Humidificateur dans la chambre</p>
+                        </div>
+                    `;
+                }
+                if (concerns.includes('sensibilité')) {
+                    routine += `
+                        <div style="padding: 15px; background: white; border-radius: 12px;">
+                            <strong style="color: #ff6b6b;">🌡️ Hypersensibilité</strong>
+                            <p style="color: #5c677d; margin-top: 8px;">• Routine minimaliste (3-4 produits max)</p>
+                            <p style="color: #5c677d;">• Éviter les changements brusques de température</p>
+                            <p style="color: #5c677d;">• Patch test obligatoire pour tout nouveau produit</p>
+                        </div>
+                    `;
+                }
+                if (concerns.includes('brillance')) {
+                    routine += `
+                        <div style="padding: 15px; background: white; border-radius: 12px;">
+                            <strong style="color: #ff6b6b;">✨ Brillance excessive</strong>
+                            <p style="color: #5c677d; margin-top: 8px;">• Papiers matifiants dans la journée</p>
+                            <p style="color: #5c677d;">• Poudre translucide sur zone T</p>
+                            <p style="color: #5c677d;">• Ne jamais sur-nettoyer (effet rebond !)</p>
+                        </div>
+                    `;
+                }
+                
+                routine += '</div></div>';
+            }
+
+            // Conseils lifestyle personnalisés
+            routine += `
+                <div class="routine-item" style="background: linear-gradient(135deg, #fff0f8, #ffe6f2); border-left: 4px solid #e91e63;">
+                    <h3 style="color: #c2185b; font-size: 1.3em; margin-bottom: 20px;">
+                        💝 Tes boosters beauté personnalisés
+                    </h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+            `;
+
+            // Conseils selon le niveau de stress
+            if (stressLevel > 7) {
+                routine += `
+                    <div style="padding: 12px; background: white; border-radius: 12px; text-align: center;">
+                        <span style="font-size: 1.8em;">😌</span>
+                        <p style="color: #5c677d; margin-top: 5px; font-weight: 500;">Anti-stress</p>
+                        <p style="color: #8e9aaf; font-size: 0.85em;">5 min de respiration profonde avant de dormir</p>
+                    </div>
+                `;
+            }
+
+            // Conseils selon l'âge
+            if (age < 25) {
+                routine += `
+                    <div style="padding: 12px; background: white; border-radius: 12px; text-align: center;">
+                        <span style="font-size: 1.8em;">🌱</span>
+                        <p style="color: #5c677d; margin-top: 5px; font-weight: 500;">Prévention</p>
+                        <p style="color: #8e9aaf; font-size: 0.85em;">Commence doucement avec les actifs</p>
+                    </div>
+                `;
+            } else if (age >= 25 && age < 35) {
+                routine += `
+                    <div style="padding: 12px; background: white; border-radius: 12px; text-align: center;">
+                        <span style="font-size: 1.8em;">⚡</span>
+                        <p style="color: #5c677d; margin-top: 5px; font-weight: 500;">Boost collagène</p>
+                        <p style="color: #8e9aaf; font-size: 0.85em;">Vitamine C + peptides essentiels</p>
+                    </div>
+                `;
+            } else {
+                routine += `
+                    <div style="padding: 12px; background: white; border-radius: 12px; text-align: center;">
+                        <span style="font-size: 1.8em;">💎</span>
+                        <p style="color: #5c677d; margin-top: 5px; font-weight: 500;">Régénération</p>
+                        <p style="color: #8e9aaf; font-size: 0.85em;">Rétinol + acide hyaluronique</p>
+                    </div>
+                `;
+            }
+
+            routine += `
+                <div style="padding: 12px; background: white; border-radius: 12px; text-align: center;">
+                    <span style="font-size: 1.8em;">💧</span>
+                    <p style="color: #5c677d; margin-top: 5px; font-weight: 500;">Hydratation</p>
+                    <p style="color: #8e9aaf; font-size: 0.85em;">2L d'eau/jour minimum</p>
+                </div>
+                <div style="padding: 12px; background: white; border-radius: 12px; text-align: center;">
+                    <span style="font-size: 1.8em;">😴</span>
+                    <p style="color: #5c677d; margin-top: 5px; font-weight: 500;">Sommeil beauté</p>
+                    <p style="color: #8e9aaf; font-size: 0.85em;">7-8h pour régénérer</p>
+                </div>
+                <div style="padding: 12px; background: white; border-radius: 12px; text-align: center;">
+                    <span style="font-size: 1.8em;">🥗</span>
+                    <p style="color: #5c677d; margin-top: 5px; font-weight: 500;">Alimentation</p>
+                    <p style="color: #8e9aaf; font-size: 0.85em;">Oméga-3 & antioxydants</p>
+                </div>
+            `;
+
+            routine += `
+                    </div>
+                </div>
+            `;
+
+            // Rappel hebdomadaire
+            routine += `
+                <div class="routine-item" style="background: linear-gradient(135deg, #e8f5e9, #dff2df); border-left: 4px solid #4caf50;">
+                    <h3 style="color: #388e3c; font-size: 1.3em; margin-bottom: 15px;">
+                        📅 Ta routine hebdomadaire
+                    </h3>
+                    <div style="display: grid; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="color: #4caf50; font-weight: bold;">Lundi & Jeudi:</span>
+                            <span style="color: #5c677d;">Exfoliation douce (AHA/BHA)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="color: #4caf50; font-weight: bold;">Mercredi:</span>
+                            <span style="color: #5c677d;">Masque hydratant/purifiant (15 min)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="color: #4caf50; font-weight: bold;">Dimanche:</span>
+                            <span style="color: #5c677d;">Journée détox - routine minimaliste</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('routineContent').innerHTML = routine;
+            showRoutine();
+        }
+
+        function showRoutine() {
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            currentStep = 4;
+            updateProgress();
+            document.getElementById('result').classList.add('active');
+            showNotification('🎉 Ta routine est prête !');
+        }
+
+        function showCheckIn() {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById('checkin').classList.add('active');
+        }
+
+        function showPhotos() {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById('photos').classList.add('active');
+        }
+
+        function showAnalytics() {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById('analytics').classList.add('active');
+            loadAnalytics();
+        }
+
+        function showAIAssistant() {
+            document.getElementById('analytics').classList.remove('active');
+            document.getElementById('ai-assistant').classList.add('active');
+            showNotification('✨ Assistant beauté activé !');
+        }
+
+        function submitCheckIn() {
+            const skinCondition = document.getElementById('skinCondition').value;
+            const sleepHours = document.getElementById('sleepHours').value;
+            
+            const checkin = {
+                date: new Date().toLocaleDateString(),
+                skinCondition: parseInt(skinCondition),
+                sleepHours: parseInt(sleepHours),
+                stressLevel: parseInt(document.getElementById('stressLevel').value)
+            };
+            
+            checkinsHistory.push(checkin);
+            localStorage.setItem('checkinsHistory', JSON.stringify(checkinsHistory));
+            
+            showNotification('✅ Check-in enregistré !');
+            document.getElementById('skinCondition').value = 5;
+            document.getElementById('sleepHours').value = 7;
+            updateSkinDisplay();
+        }
+
+        function selectPhotoType(type) {
+            photoType = type;
+            document.querySelectorAll('.photo-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-type="${type}"]`).classList.add('active');
+        }
+
+        function uploadPhoto(event) {
+            const file = event.target.files[0];
+            if (file) {
+                showNotification('📸 Photo ajoutée avec succès !');
+                // Ici on pourrait ajouter le code pour afficher la photo
+            }
+        }
+
+        function loadAnalytics() {
+            setTimeout(() => {
+                const analyticsContent = document.getElementById('analyticsContent');
+                analyticsContent.innerHTML = `
+                    <div style="padding: 20px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 15px;">
+                        <h3>📊 Tes statistiques</h3>
+                        <p>Check-ins effectués : ${checkinsHistory.length}</p>
+                        <p>Moyenne état de peau : ${checkinsHistory.length > 0 ? 
+                            (checkinsHistory.reduce((acc, c) => acc + c.skinCondition, 0) / checkinsHistory.length).toFixed(1) 
+                            : 'N/A'}/10</p>
+                        <p>Progression : ${checkinsHistory.length >= 3 ? '+15%' : 'Continue tes check-ins !'}</p>
+                    </div>
+                `;
+            }, 500);
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // === ASSISTANT IA INTELLIGENT ===
+        function generateRecommendations() {
+            const output = document.getElementById('aiOutput');
+            output.classList.add('active');
+            
+            const profile = {
+                skinType: skinType,
+                concerns: concerns,
+                stressLevel: parseInt(document.getElementById('stressLevel')?.value || 5)
+            };
+            
+            showAILoading();
+            
+            setTimeout(() => {
+                const recommendations = analyzeAndRecommend(profile, checkinsHistory);
+                displayRecommendations(recommendations);
+            }, 2000);
+        }
+
+        function generatePredictions() {
+            const output = document.getElementById('aiOutput');
+            output.classList.add('active');
+            
+            showAILoading();
+            
+            setTimeout(() => {
+                // Si pas assez de données, on simule
+                if (!checkinsHistory || checkinsHistory.length === 0) {
+                    checkinsHistory = [
+                        {skinCondition: 5, stressLevel: 7, date: new Date()},
+                        {skinCondition: 5.5, stressLevel: 6, date: new Date()},
+                        {skinCondition: 6, stressLevel: 6, date: new Date()}
+                    ];
+                }
+                
+                const predictions = predictFutureResults(checkinsHistory);
+                displayPredictions(predictions);
+            }, 2500);
+        }
+
+        function generateInsights() {
+            const output = document.getElementById('aiOutput');
+            output.classList.add('active');
+            
+            showAILoading();
+            
+            setTimeout(() => {
+                const insights = generatePersonalInsights(checkinsHistory, skinType, concerns);
+                displayInsights(insights);
+            }, 2000);
+        }
+
+        function generateTips() {
+            const output = document.getElementById('aiOutput');
+            output.classList.add('active');
+            
+            showAILoading();
+            
+            setTimeout(() => {
+                const tips = generateAdaptiveTips(checkinsHistory, skinType, concerns);
+                displayTips(tips);
+            }, 1500);
+        }
+
+        function showAILoading() {
+            const output = document.getElementById('aiOutput');
+            output.innerHTML = `
+                <div class="ai-loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>J'analyse tes données avec bienveillance...</p>
+                </div>
+            `;
+        }
+
+        // Fonctions d'analyse IA
+        function analyzeAndRecommend(profile, checkins) {
+            const recommendations = [];
+            
+            if (profile.skinType === 'grasse' || profile.concerns.includes('acné')) {
+                recommendations.push({
+                    product: 'Niacinamide 10% + Zinc 1%',
+                    brand: 'The Ordinary',
+                    price: '12€',
+                    reason: 'Réduit la production de sébum et les imperfections',
+                    urgency: 'high'
+                });
+            }
+            
+            if (profile.skinType === 'sèche' || profile.concerns.includes('sécheresse')) {
+                recommendations.push({
+                    product: 'Crème Hydratante Céramides',
+                    brand: 'CeraVe',
+                    price: '15€',
+                    reason: 'Restaure la barrière cutanée',
+                    urgency: 'high'
+                });
+            }
+            
+            if (profile.concerns.includes('rides') || profile.concerns.includes('taches pigmentaires')) {
+                recommendations.push({
+                    product: 'Sérum Vitamine C 20%',
+                    brand: 'Skinceuticals',
+                    price: '95€',
+                    reason: 'Anti-âge et éclaircissant',
+                    urgency: 'medium'
+                });
+            }
+            
+            recommendations.push({
+                product: 'SPF 50+ Fluide Invisible',
+                brand: 'La Roche-Posay',
+                price: '18€',
+                reason: 'Protection UV essentielle',
+                urgency: 'high'
+            });
+            
+            return recommendations;
+        }
+
+        function predictFutureResults(checkins) {
+            const hasData = checkins && checkins.length > 0;
+            const currentScore = hasData ? 
+                checkins[checkins.length - 1].skinCondition : 5;
+            
+            const predictions = {
+                currentScore: currentScore,
+                dataQuality: checkins.length > 10 ? 'Excellente' : 
+                             checkins.length > 5 ? 'Bonne' : 
+                             checkins.length > 2 ? 'Moyenne' : 'Faible',
+                trend: 'Amélioration',
+                predictions: [
+                    {
+                        period: '2 semaines',
+                        score: Math.min(10, currentScore + 1),
+                        confidence: 85,
+                        description: 'Peau plus équilibrée, moins d\'imperfections'
+                    },
+                    {
+                        period: '1 mois',
+                        score: Math.min(10, currentScore + 2),
+                        confidence: 75,
+                        description: 'Texture affinée, éclat naturel visible'
+                    },
+                    {
+                        period: '3 mois',
+                        score: Math.min(10, currentScore + 3),
+                        confidence: 65,
+                        description: 'Transformation complète, peau rayonnante'
+                    }
+                ]
+            };
+            
+            return predictions;
+        }
+
+        function generatePersonalInsights(checkins, skinType, concerns) {
+            const insights = [];
+            
+            if (checkins.length > 5) {
+                const avgSkin = checkins.reduce((acc, c) => acc + c.skinCondition, 0) / checkins.length;
+                if (avgSkin > 7) {
+                    insights.push({
+                        type: 'positive',
+                        title: '🎉 Excellents progrès !',
+                        content: 'Ta peau s\'améliore constamment. Continue cette routine !'
+                    });
+                }
+            }
+            
+            if (concerns.includes('acné')) {
+                insights.push({
+                    type: 'warning',
+                    title: '⚠️ Attention aux produits comédogènes',
+                    content: 'Évite les huiles minérales et privilégie les formules non-comédogènes'
+                });
+            }
+            
+            insights.push({
+                type: 'info',
+                title: '💡 Astuce du jour',
+                content: 'Change ta taie d\'oreiller 2x/semaine pour éviter l\'accumulation de bactéries'
+            });
+            
+            return insights;
+        }
+
+        function generateAdaptiveTips(checkins, skinType, concerns) {
+            const tips = [];
+            
+            tips.push({
+                icon: '💧',
+                title: 'Hydratation optimale',
+                content: 'Bois au moins 2L d\'eau par jour pour une peau hydratée de l\'intérieur',
+                priority: 'high'
+            });
+            
+            if (skinType === 'grasse') {
+                tips.push({
+                    icon: '🧼',
+                    title: 'Double nettoyage',
+                    content: 'Le soir, utilise d\'abord une huile nettoyante puis un gel moussant',
+                    priority: 'medium'
+                });
+            }
+            
+            tips.push({
+                icon: '😴',
+                title: 'Sommeil réparateur',
+                content: 'Vise 7-8h de sommeil pour permettre à ta peau de se régénérer',
+                priority: 'high'
+            });
+            
+            tips.push({
+                icon: '🥗',
+                title: 'Alimentation beauté',
+                content: 'Privilégie les aliments riches en oméga-3 et antioxydants',
+                priority: 'medium'
+            });
+            
+            return tips;
+        }
+
+        function displayRecommendations(recommendations) {
+            const output = document.getElementById('aiOutput');
+            let html = `
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h3><i class="fas fa-shopping-cart"></i> Recommandations Personnalisées</h3>
+                    <p>Basées sur ton type de peau ${skinType} et tes préoccupations</p>
+                </div>
+            `;
+            
+            recommendations.forEach(rec => {
+                html += `
+                    <div class="ai-recommendation">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <strong style="color: #2d3748; font-size: 1.1em;">${rec.product}</strong>
+                            <span style="background: ${rec.urgency === 'high' ? '#f56565' : '#ed8936'}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8em;">
+                                ${rec.urgency === 'high' ? 'Priorité' : 'Conseillé'}
+                            </span>
+                        </div>
+                        <p style="color: #718096; margin: 5px 0;">${rec.brand}</p>
+                        <p style="color: #4a5568; margin: 10px 0;">${rec.reason}</p>
+                        <p style="color: #667eea; font-weight: 700; font-size: 1.2em;">${rec.price}</p>
+                    </div>
+                `;
+            });
+            
+            output.innerHTML = html;
+            showNotification('🎯 Recommandations générées !');
+        }
+
+        function displayPredictions(predictions) {
+            const output = document.getElementById('aiOutput');
+            
+            let html = `
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h3><i class="fas fa-crystal-ball"></i> Prédictions d'Évolution</h3>
+                    <p>Qualité des données: ${predictions.dataQuality} • Tendance: ${predictions.trend}</p>
+                </div>
+                <div class="ai-recommendation">
+                    <div style="text-align: center;">
+                        <div style="font-size: 3em; font-weight: 700; color: #667eea;">${predictions.currentScore}</div>
+                        <div style="color: #718096;">État actuel de ta peau</div>
+                    </div>
+                </div>
+            `;
+            
+            predictions.predictions.forEach(pred => {
+                html += `
+                    <div class="ai-recommendation">
+                        <div style="text-align: center;">
+                            <div style="font-size: 2em; font-weight: 700; color: #48bb78;">${pred.score}/10</div>
+                            <div style="color: #718096; margin: 5px 0;">Dans ${pred.period}</div>
+                            <div style="margin: 10px 0; color: #4a5568;">${pred.description}</div>
+                            <div style="font-size: 0.9em; color: #718096;">Confiance: ${pred.confidence}%</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            output.innerHTML = html;
+            showNotification('🔮 Prédictions générées !');
+        }
+
+        function displayInsights(insights) {
+            const output = document.getElementById('aiOutput');
+            let html = `
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h3><i class="fas fa-lightbulb"></i> Insights Personnalisés</h3>
+                    <p>Patterns découverts dans tes données</p>
+                </div>
+            `;
+            
+            insights.forEach(insight => {
+                const bgColor = insight.type === 'positive' ? '#f0fff4' : 
+                               insight.type === 'warning' ? '#fff5f0' : '#fff0f8';
+                const borderColor = insight.type === 'positive' ? '#66d9a0' : 
+                                   insight.type === 'warning' ? '#ffb088' : '#ff6b6b';
+                
+                html += `
+                    <div style="background: ${bgColor}; border-left: 4px solid ${borderColor}; border-radius: 12px; padding: 20px; margin: 15px 0;">
+                        <div style="font-weight: 700; color: #2d3748; margin-bottom: 8px;">${insight.title}</div>
+                        <div style="color: #4a5568; line-height: 1.6;">${insight.content}</div>
+                    </div>
+                `;
+            });
+            
+            output.innerHTML = html;
+            showNotification('💡 Insights générés !');
+        }
+
+        function displayTips(tips) {
+            const output = document.getElementById('aiOutput');
+            let html = `
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h3><i class="fas fa-magic"></i> Conseils Adaptatifs</h3>
+                    <p>Tips personnalisés pour optimiser ta routine</p>
+                </div>
+            `;
+            
+            tips.forEach(tip => {
+                html += `
+                    <div class="ai-recommendation">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <div style="font-weight: 700; color: #2d3748; font-size: 1.1em;">${tip.icon} ${tip.title}</div>
+                            <span style="background: ${tip.priority === 'high' ? '#48bb78' : '#ed8936'}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8em;">
+                                ${tip.priority === 'high' ? 'Priorité' : 'Conseil'}
+                            </span>
+                        </div>
+                        <div style="color: #4a5568; line-height: 1.6;">${tip.content}</div>
+                    </div>
+                `;
+            });
+            
+            output.innerHTML = html;
+            showNotification('✨ Conseils adaptatifs générés !');
+        }
+
+        // Charger l'historique au démarrage
+        const savedCheckins = localStorage.getItem('checkinsHistory');
+        if (savedCheckins) {
+            checkinsHistory = JSON.parse(savedCheckins);
+        }
+    </script>
+</body>
+</html>
