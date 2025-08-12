@@ -281,9 +281,15 @@ def create_token(user_id: str) -> str:
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 # Routes API
-@app.get("/")
-def hello():
-    return {"message": "Hello ! Ton API SkinCare fonctionne ! 🎉", "status": "OK"}
+from fastapi.responses import HTMLResponse
+
+@app.get("/", response_class=HTMLResponse)
+async def home():
+    try:
+        with open("index.html", "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return "<h1>Interface en construction...</h1><p>L'API fonctionne parfaitement!</p>"
 
 @app.get("/health")
 def health_check():
