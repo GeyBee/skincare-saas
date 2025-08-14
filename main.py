@@ -283,14 +283,47 @@ def create_token(user_id: str) -> str:
 # Routes API
 from fastapi.responses import HTMLResponse
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
 async def home():
-    try:
-        with open("index.html", "r", encoding="utf-8") as f:
-            return f.read()
-    except FileNotFoundError:
-        return "<h1>Interface en construction...</h1><p>L'API fonctionne parfaitement!</p>"
-
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SkinCare - Ton Coach Beauté Personnel</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                text-align: center;
+                padding: 50px;
+            }
+            h1 { font-size: 3em; margin-bottom: 20px; }
+            p { font-size: 1.2em; }
+            .btn {
+                display: inline-block;
+                margin: 20px;
+                padding: 15px 30px;
+                background: white;
+                color: #764ba2;
+                text-decoration: none;
+                border-radius: 25px;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>🌸 SkinCare App</h1>
+        <p>Ton coach beauté personnel avec IA</p>
+        <a href="/docs" class="btn">Explorer l'API</a>
+        <a href="/health" class="btn">Statut</a>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
+    
 @app.get("/health")
 def health_check():
     return {
