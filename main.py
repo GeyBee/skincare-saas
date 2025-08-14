@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional, Dict, Any
 import bcrypt
@@ -7,7 +8,6 @@ import jwt
 from datetime import datetime, timedelta
 import json
 import os
-import uuid
 import random
 
 # === IA FUNCTIONS ===
@@ -16,8 +16,7 @@ def analyze_skin_progress(checkins: List[Dict], photos: List[Dict]) -> Dict:
     if not checkins:
         return {"trend": "insufficient_data", "confidence": 0}
     
-    # Analyser les tendances
-    recent_checkins = sorted(checkins, key=lambda x: x["created_at"])[-7:]  # 7 derniers jours
+    recent_checkins = sorted(checkins, key=lambda x: x["created_at"])[-7:]
     old_checkins = sorted(checkins, key=lambda x: x["created_at"])[:-7] if len(checkins) > 7 else []
     
     if not old_checkins:
@@ -59,26 +58,21 @@ def generate_ai_recommendations(profile: Dict, checkins: List[Dict], photos: Lis
     concerns = profile.get("main_concerns", [])
     stress_level = profile.get("stress_level", 5)
     
-    # Base de données produits
     products_db = {
         "nettoyants": [
             {"name": "CeraVe Gel Moussant", "price": 12.90, "rating": 4.6, "skin_types": ["normale", "mixte", "grasse"]},
             {"name": "La Roche-Posay Toleriane", "price": 15.50, "rating": 4.7, "skin_types": ["sensible", "sèche"]},
-            {"name": "Neutrogena Ultra Gentle", "price": 8.99, "rating": 4.3, "skin_types": ["sensible", "normale"]},
         ],
         "serums": [
             {"name": "The Ordinary Niacinamide 10%", "price": 7.50, "rating": 4.4, "concerns": ["acné", "pores dilatés"]},
             {"name": "Vichy Mineral 89", "price": 24.90, "rating": 4.5, "concerns": ["sécheresse", "sensibilité"]},
-            {"name": "Paula's Choice BHA 2%", "price": 33.00, "rating": 4.7, "concerns": ["acné", "points noirs"]},
         ],
         "hydratants": [
             {"name": "Cetaphil Daily Moisturizer", "price": 11.90, "rating": 4.4, "skin_types": ["normale", "sèche"]},
             {"name": "Effaclar Mat La Roche-Posay", "price": 16.90, "rating": 4.3, "skin_types": ["grasse", "mixte"]},
-            {"name": "Toleriane Ultra Fluide", "price": 18.50, "rating": 4.6, "skin_types": ["sensible"]},
         ]
     }
     
-    # Recommandations basées sur le type de peau
     for category, products in products_db.items():
         best_product = None
         best_score = 0
@@ -86,19 +80,15 @@ def generate_ai_recommendations(profile: Dict, checkins: List[Dict], photos: Lis
         for product in products:
             score = 0
             
-            # Score basé sur le type de peau
             if "skin_types" in product and skin_type in product["skin_types"]:
                 score += 40
             
-            # Score basé sur les préoccupations
             if "concerns" in product:
                 matching_concerns = set(concerns) & set(product["concerns"])
                 score += len(matching_concerns) * 30
             
-            # Score basé sur la note
             score += product["rating"] * 5
             
-            # Score basé sur le prix
             if product["price"] < 15:
                 score += 10
             elif product["price"] < 25:
@@ -109,7 +99,6 @@ def generate_ai_recommendations(profile: Dict, checkins: List[Dict], photos: Lis
                 best_product = product
         
         if best_product:
-            # Calculer la raison de la recommandation
             reasons = []
             if "skin_types" in best_product and skin_type in best_product["skin_types"]:
                 reasons.append(f"Adapté aux peaux {skin_type}s")
@@ -126,7 +115,6 @@ def generate_ai_recommendations(profile: Dict, checkins: List[Dict], photos: Lis
                 "urgency": "high" if best_score > 80 else "medium" if best_score > 60 else "low"
             })
     
-    # Recommandations basées sur le stress
     if stress_level > 7:
         recommendations.append({
             "category": "Bien-être",
@@ -137,96 +125,16 @@ def generate_ai_recommendations(profile: Dict, checkins: List[Dict], photos: Lis
                 "description": "Masque anti-stress pour peaux sensibilisées."
             },
             "match_score": 85,
-            "reasons": ["Niveau de stress élevé détecté", "Aide à calmer les inflammations"],
+            "reasons": ["Niveau de stress élevé détecté"],
             "urgency": "medium"
         })
     
     return sorted(recommendations, key=lambda x: x["match_score"], reverse=True)
 
-def predict_future_results(profile: Dict, checkins: List[Dict]) -> Dict:
-    """Prédit les résultats futurs"""
-    if len(checkins) < 3:
-        return {"message": "Pas assez de données pour une prédiction fiable"}
-    
-    progress = analyze_skin_progress(checkins, [])
-    current_avg = progress.get("recent_average", 5)
-    trend = progress.get("improvement_score", 0)
-    
-    predictions = {}
-    
-    for weeks in [2, 4, 8, 12]:
-        predicted_score = current_avg + (trend * weeks * 0.3)
-        predicted_score = max(1, min(10, predicted_score))
-        
-        predictions[f"week_{weeks}"] = {
-            "predicted_score": round(predicted_score, 1),
-            "confidence": max(30, progress["confidence"] - (weeks * 5)),
-            "description": get_prediction_description(predicted_score)
-        }
-    
-    return {
-        "current_score": current_avg,
-        "trend_direction": "amélioration" if trend > 0 else "stable" if trend > -0.3 else "déclin",
-        "predictions": predictions,
-        "reliability": "high" if len(checkins) > 10 else "medium" if len(checkins) > 5 else "low"
-    }
-
-def get_prediction_description(score: float) -> str:
-    """Description du score prédit"""
-    if score >= 8:
-        return "Peau excellente, très peu d'imperfections"
-    elif score >= 7:
-        return "Peau en bonne santé avec quelques améliorations possibles"
-    elif score >= 6:
-        return "Peau correcte avec des problèmes mineurs"
-    elif score >= 5:
-        return "Peau moyenne nécessitant des soins réguliers"
-    elif score >= 4:
-        return "Peau problématique nécessitant une attention particulière"
-    else:
-        return "Peau nécessitant des soins intensifs"
-
-def generate_smart_tips(profile: Dict, checkins: List[Dict], photos: List[Dict]) -> List[Dict]:
-    """Génère des conseils intelligents"""
-    tips = []
-    
-    recent_checkins = sorted(checkins, key=lambda x: x["created_at"])[-5:] if checkins else []
-    
-    # Analyse des patterns de stress
-    if recent_checkins:
-        avg_stress = sum(c["stress_level"] for c in recent_checkins) / len(recent_checkins)
-        avg_skin = sum(c["skin_condition"] for c in recent_checkins) / len(recent_checkins)
-        
-        if avg_stress > 7 and avg_skin < 6:
-            tips.append({
-                "type": "lifestyle",
-                "priority": "high",
-                "title": "Gestion du stress recommandée",
-                "description": "Votre niveau de stress élevé peut impacter votre peau. Essayez la méditation ou le yoga.",
-                "actionable": True,
-                "estimated_impact": "high"
-            })
-    
-    # Conseils basés sur le type de peau
-    skin_type = profile.get("skin_type", "normale")
-    concerns = profile.get("main_concerns", [])
-    
-    if skin_type == "grasse" and "acné" in concerns:
-        tips.append({
-            "type": "product",
-            "priority": "high",
-            "title": "Ajoutez un exfoliant chimique",
-            "description": "L'acide salicylique (BHA) peut considérablement améliorer l'acné sur peau grasse.",
-            "actionable": True,
-            "estimated_impact": "high"
-        })
-    
-    return tips
-
 # Créer l'application
 app = FastAPI(title="SkinCare SaaS API", version="1.0.0")
 
-# CORS pour permettre les requêtes depuis le frontend
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -235,11 +143,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configuration simple
+# Configuration
 SECRET_KEY = "skincare-secret-key-2024"
 ALGORITHM = "HS256"
 
-# Stockage temporaire en mémoire (pour test)
+# Stockage temporaire
 users_db = {}
 profiles_db = {}
 checkins_db = {}
@@ -281,9 +189,7 @@ def create_token(user_id: str) -> str:
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 # Routes API
-from fastapi.responses import HTMLResponse
-
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def home():
     html_content = """
     <!DOCTYPE html>
@@ -294,52 +200,111 @@ async def home():
         <title>SkinCare - Ton Coach Beauté Personnel</title>
         <style>
             body {
-                font-family: Arial, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                font-family: 'Segoe UI', Arial, sans-serif;
+                background: linear-gradient(135deg, #FF6B9D 0%, #C44569 100%);
                 color: white;
                 text-align: center;
-                padding: 50px;
+                padding: 50px 20px;
+                margin: 0;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
             }
-            h1 { font-size: 3em; margin-bottom: 20px; }
-            p { font-size: 1.2em; }
+            .container {
+                max-width: 600px;
+                width: 100%;
+            }
+            h1 { 
+                font-size: 3.5em; 
+                margin-bottom: 20px;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+                animation: fadeIn 1s ease;
+            }
+            p { 
+                font-size: 1.3em;
+                margin-bottom: 40px;
+                opacity: 0.95;
+            }
+            .buttons {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
             .btn {
                 display: inline-block;
-                margin: 20px;
-                padding: 15px 30px;
+                padding: 15px 35px;
                 background: white;
-                color: #764ba2;
+                color: #C44569;
                 text-decoration: none;
-                border-radius: 25px;
+                border-radius: 30px;
                 font-weight: bold;
+                font-size: 1.1em;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            }
+            .btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+                background: #f8f8f8;
+            }
+            .status {
+                margin-top: 50px;
+                padding: 20px;
+                background: rgba(255,255,255,0.1);
+                border-radius: 15px;
+                backdrop-filter: blur(10px);
+            }
+            .status-item {
+                display: inline-block;
+                margin: 0 20px;
+                font-size: 0.9em;
+            }
+            .status-item span {
+                color: #90EE90;
+                font-weight: bold;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
             }
         </style>
     </head>
     <body>
-        <h1>🌸 SkinCare App</h1>
-        <p>Ton coach beauté personnel avec IA</p>
-        <a href="/docs" class="btn">Explorer l'API</a>
-        <a href="/health" class="btn">Statut</a>
+        <div class="container">
+            <h1>🌸 SkinCare App</h1>
+            <p>Ton coach beauté personnel propulsé par l'IA</p>
+            <div class="buttons">
+                <a href="/docs" class="btn">📚 Explorer l'API</a>
+                <a href="/health" class="btn">💚 Statut Système</a>
+            </div>
+            <div class="status">
+                <div class="status-item">API: <span>✓ Opérationnel</span></div>
+                <div class="status-item">Version: <span>1.0.0</span></div>
+                <div class="status-item">IA: <span>✓ Activée</span></div>
+            </div>
+        </div>
     </body>
     </html>
     """
     return HTMLResponse(content=html_content)
-    
+
 @app.get("/health")
 def health_check():
     return {
         "status": "OK", 
         "app": "SkinCare API",
-        "users_count": len(users_db),
-        "profiles_count": len(profiles_db)
+        "version": "1.0.0",
+        "timestamp": datetime.utcnow().isoformat()
     }
 
 @app.post("/auth/register")
 def register(user_data: UserRegistration):
-    # Vérifier si email existe déjà
     if any(u["email"] == user_data.email for u in users_db.values()):
         raise HTTPException(status_code=400, detail="Email déjà utilisé")
     
-    # Créer nouvel utilisateur
     user_id = f"user_{len(users_db) + 1}"
     users_db[user_id] = {
         "id": user_id,
@@ -363,7 +328,6 @@ def register(user_data: UserRegistration):
 
 @app.post("/auth/login")
 def login(login_data: UserLogin):
-    # Chercher utilisateur
     user = next((u for u in users_db.values() if u["email"] == login_data.email), None)
     if not user or not verify_password(login_data.password, user["password"]):
         raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
@@ -381,8 +345,7 @@ def login(login_data: UserLogin):
 
 @app.post("/profile/skin")
 def create_skin_profile(profile: SkinProfile):
-    # Simpler pour test - pas de token pour l'instant
-    user_id = f"user_1"  # User par défaut pour test
+    user_id = f"user_1"
     
     profiles_db[user_id] = {
         "user_id": user_id,
@@ -399,14 +362,14 @@ def create_skin_profile(profile: SkinProfile):
 
 @app.get("/profile/skin")
 def get_skin_profile():
-    user_id = "user_1"  # User par défaut pour test
+    user_id = "user_1"
     if user_id not in profiles_db:
         raise HTTPException(status_code=404, detail="Profil non trouvé")
     return profiles_db[user_id]
 
 @app.post("/checkin")
 def daily_checkin(checkin: DailyCheckIn):
-    user_id = "user_1"  # User par défaut pour test
+    user_id = "user_1"
     today = datetime.utcnow().date().isoformat()
     checkin_id = f"{user_id}_{today}"
     
@@ -426,20 +389,18 @@ def daily_checkin(checkin: DailyCheckIn):
 
 @app.get("/checkin/history")
 def get_checkin_history():
-    user_id = "user_1"  # User par défaut pour test
+    user_id = "user_1"
     user_checkins = [c for c in checkins_db.values() if c["user_id"] == user_id]
     return {"checkins": user_checkins, "count": len(user_checkins)}
 
 @app.post("/photos/upload")
 async def upload_photo(file: UploadFile = File(...), photo_type: str = "progress"):
-    user_id = "user_1"  # User par défaut pour test
+    user_id = "user_1"
     
-    # Vérifier le type de fichier
     if not file.content_type.startswith('image/'):
         raise HTTPException(status_code=400, detail="Le fichier doit être une image")
     
-    # Générer un nom unique pour la photo
-    photo_id = str(uuid.uuid4())
+    photo_id = f"photo_{datetime.utcnow().timestamp()}_{random.randint(1000,9999)}"
     filename = f"{photo_id}_{file.filename}"
     
     photo_data = {
@@ -448,7 +409,7 @@ async def upload_photo(file: UploadFile = File(...), photo_type: str = "progress
         "filename": filename,
         "type": photo_type,
         "upload_date": datetime.utcnow().isoformat(),
-        "size": file.size if hasattr(file, 'size') else 0
+        "size": 0
     }
     
     photos_db[photo_id] = photo_data
@@ -461,7 +422,7 @@ async def upload_photo(file: UploadFile = File(...), photo_type: str = "progress
 
 @app.get("/photos/gallery")
 async def get_photo_gallery():
-    user_id = "user_1"  # User par défaut pour test
+    user_id = "user_1"
     user_photos = [photo for photo in photos_db.values() if photo["user_id"] == user_id]
     user_photos.sort(key=lambda x: x["upload_date"], reverse=True)
     
@@ -499,17 +460,13 @@ async def get_progress_analytics():
         "skin_trend": "amélioration" if len(skin_conditions) >= 2 and skin_conditions[-1] > skin_conditions[0] else "stable",
         "best_skin_day": max(skin_conditions) if skin_conditions else 0,
         "worst_skin_day": min(skin_conditions) if skin_conditions else 0,
-        "consistency_score": round((len(user_checkins) / 30) * 100, 1),
-        "recent_checkins": user_checkins[-7:] if len(user_checkins) >= 7 else user_checkins
+        "consistency_score": round((len(user_checkins) / 30) * 100, 1)
     }
     
     return analytics
 
-# === ROUTES IA AVANCÉES ===
-
 @app.get("/ai/recommendations")
 async def get_ai_recommendations():
-    """Recommandations IA personnalisées"""
     user_id = "user_1"
     
     profile = profiles_db.get(user_id, {})
@@ -526,51 +483,5 @@ async def get_ai_recommendations():
         "recommendations": recommendations,
         "skin_analysis": progress,
         "total_recommendations": len(recommendations),
-        "high_priority": len([r for r in recommendations if r.get("urgency") == "high"]),
         "generated_at": datetime.utcnow().isoformat()
     }
-
-@app.get("/ai/predictions")
-async def get_future_predictions():
-    """Prédictions d'amélioration futures"""
-    user_id = "user_1"
-    
-    profile = profiles_db.get(user_id, {})
-    checkins = [c for c in checkins_db.values() if c["user_id"] == user_id]
-    
-    if not profile:
-        return {"message": "Créez d'abord votre profil"}
-    
-    predictions = predict_future_results(profile, checkins)
-    
-    return {
-        "predictions": predictions,
-        "data_quality": "high" if len(checkins) > 10 else "medium" if len(checkins) > 5 else "low",
-        "generated_at": datetime.utcnow().isoformat()
-    }
-
-@app.get("/ai/smart-tips")
-async def get_smart_tips():
-    """Conseils intelligents personnalisés"""
-    user_id = "user_1"
-    
-    profile = profiles_db.get(user_id, {})
-    checkins = [c for c in checkins_db.values() if c["user_id"] == user_id]
-    photos = [p for p in photos_db.values() if p["user_id"] == user_id]
-    
-    if not profile:
-        return {"message": "Créez d'abord votre profil", "tips": []}
-    
-    tips = generate_smart_tips(profile, checkins, photos)
-    
-    return {
-        "tips": tips,
-        "high_priority_tips": [t for t in tips if t.get("priority") == "high"],
-        "actionable_tips": [t for t in tips if t.get("actionable")],
-        "total_tips": len(tips),
-        "generated_at": datetime.utcnow().isoformat()
-    }
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
